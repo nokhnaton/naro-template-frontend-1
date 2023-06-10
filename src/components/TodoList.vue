@@ -4,12 +4,17 @@ interface Task {
   name: string
   isFinished: boolean
 }
-const tasks = ref<Task[]>([])
+// ローカルストレージを設定する
+const myStorage = localStorage
+// ローカルストレージからデータを取り出す。何もデータが登録されてなかったら空の配列を返す。
+const tasks = ref<Task[]>(JSON.parse(myStorage.getItem('tasks') ?? '[]'))
+
 // 完了済みタスクを計算して保持しておく
 const finishedTasks = computed(() => tasks.value.filter((task) => task.isFinished))
 // 未完タスクを計算して保持しておく
 const notFinishedTasks = computed(() => tasks.value.filter((task) => !task.isFinished))
 const newTaskName = ref('')
+
 const addTask = () => {
   // バリデーションを通ったらタスク一覧に追加する
   if (newTaskName.value === '') {
@@ -25,6 +30,7 @@ const addTask = () => {
     isFinished: false
   })
   newTaskName.value = ''
+  updateTasks()
 }
 const finishTask = (taskName: string) => {
   // タスク名がtaskNameのタスクを完了済みにする
@@ -37,6 +43,11 @@ const finishTask = (taskName: string) => {
     }
     return task
   })
+  updateTasks()
+}
+
+const updateTasks = () => {
+  myStorage.setItem('tasks', JSON.stringify(tasks.value))
 }
 </script>
 
